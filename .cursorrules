@@ -1,0 +1,5 @@
+# .cursorrules (mini)
+- Prefer explicit validation on inputs; add a negative test for each public route.
+- Use meaningful HTTP status codes and problem+json error format.
+- Never log secrets/PII; use structured logs.
+- Keep multi-file edits small; show a single preview diff; ask for approval before applying.

@@ -1,0 +1,4 @@
+- Keep responses deterministic when possible (be explicit).
+- Follow naming conventions and logging style from existing files.
+- Prefer small, reviewable diffs with summaries.
+- Always propose at least one negative test for new endpoints.

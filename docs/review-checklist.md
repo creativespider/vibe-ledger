@@ -1,0 +1,5 @@
+- Input validation present (happy + negative paths)
+- Correct HTTP status codes; consistent error body
+- No secrets/PII in logs; structured logging
+- Pagination/limits where applicable; timeouts/retries
+- Tests cover edge cases; no flakiness
