@@ -1,49 +1,70 @@
-import { headers } from 'next/headers';
+"use client";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-export const dynamic = 'force-dynamic';
-
-async function fetchProjectEntries(project) {
-  try {
-    const h = headers();
-    const host = h.get('host');
-    const proto = h.get('x-forwarded-proto') || 'http';
-    const base = `${proto}://${host}`;
-    const res = await fetch(`${base}/api/entries?project=${encodeURIComponent(project)}`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
+const types = ["UI", "API", "test", "security"];
 
 function groupByType(entries) {
-  const groups = { UI: [], API: [], test: [], security: [] };
-  for (const e of entries) {
-    if (groups[e.type]) groups[e.type].push(e);
-  }
+  const groups = {};
+  types.forEach(type => groups[type] = []);
+  entries.forEach(e => { if (groups[e.type]) groups[e.type].push(e); });
   return groups;
 }
 
-export default async function ReportPage({ params }) {
-  const project = params.project;
-  const entries = await fetchProjectEntries(project);
-  const groups = groupByType(entries);
+export default function ReportPage() {
+  const params = useParams();
+  const project = typeof params?.project === 'string' ? params.project : '';
+  const [entries, setEntries] = useState([]);
+  useEffect(() => {
+    if (!project) return;
+    const q = encodeURIComponent(project);
+    fetch(`/api/entries?project=${q}`)
+      .then(r => r.json())
+      .then(setEntries);
+  }, [project]);
+
+  const grouped = groupByType(entries);
+
+  const [copied, setCopied] = useState(false);
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1100);
+    });
+  }
+
   return (
-    <main style={{ padding: '24px', fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-      <h1 style={{ marginBottom: '12px' }}>Report: {project}</h1>
-      {Object.entries(groups).map(([type, list]) => (
-        <section key={type} style={{ marginBottom: '24px' }}>
-          <h2 style={{ margin: '16px 0 8px' }}>{type}</h2>
-          {list.length === 0 ? (
-            <div style={{ color: '#666' }}>No items</div>
+    <main style={{ maxWidth: 760, margin: "40px auto", fontFamily: "system-ui" }}>
+      <h1 style={{ textAlign: "center", margin: 24 }}>
+        Report: <span style={{ color: "#095" }}>{project}</span>
+      </h1>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <button onClick={copyLink} style={{
+          background: "#eee", border: "1px solid #ccc", color: "#222", padding: "8px 18px", borderRadius: 4, fontWeight: 500
+        }}>
+          {copied ? "Copied link!" : "Copy public link"}
+        </button>
+      </div>
+      {types.map(type => (
+        <section key={type} style={{ marginBottom: 24 }}>
+          <h2 style={{ marginBottom: 6 }}>{type} <span style={{
+            background: "#eee", borderRadius: 8, padding: "2px 12px", fontSize: 12
+          }}>{grouped[type].length}</span></h2>
+          {grouped[type].length === 0 ? (
+            <div style={{ color: "#888" }}>No entries</div>
           ) : (
-            <ul style={{ paddingLeft: '18px' }}>
-              {list.map((e) => (
-                <li key={e.id}>
-                  <strong>{e.prompt}</strong>{' '}
-                  <span style={{ color: '#666' }}>({new Date(e.created_at).toLocaleDateString()})</span>
+            <ul style={{ margin: 0, paddingLeft: 24 }}>
+              {grouped[type].map(entry =>
+                <li key={entry.id} style={{ marginBottom: 10 }}>
+                  <div><b>Created:</b> {new Date(entry.created_at).toLocaleString()}</div>
+                  <div><b>Prompt:</b> {entry.prompt || <em style={{ color: "#bbb" }}>none</em>}</div>
+                  <div><b>AI Draft:</b> <span style={{ color: "#345" }}>{entry.ai_draft || <em>none</em>}</span></div>
+                  <div><b>Edits:</b> <span style={{ color: "#345" }}>{entry.edits || <em>none</em>}</span></div>
+                  <div><b>Why:</b> <span style={{ color: "#345" }}>{entry.why || <em>none</em>}</span></div>
+                  <div><b>Evidence:</b> <span style={{ color: "#345" }}>{entry.evidence || <em>none</em>}</span></div>
                 </li>
-              ))}
+              )}
             </ul>
           )}
         </section>

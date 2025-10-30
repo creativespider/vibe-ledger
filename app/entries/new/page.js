@@ -1,43 +1,85 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+const entryTypes = ["UI", "API", "test", "security"];
+
 export default function NewEntryPage() {
+  const [form, setForm] = useState({
+    project: "",
+    type: entryTypes[0],
+    prompt: "",
+    ai_draft: "",
+    edits: "",
+    why: "",
+    evidence: ""
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  function onField(e) {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/entries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (res.status === 201) {
+      router.push("/entries");
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setError(d?.details || "Error—please check fields");
+      setLoading(false);
+    }
+  }
+
   return (
-    <main style={{ padding: '24px', fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-      <h1 style={{ marginBottom: '12px' }}>New Entry</h1>
-      <form method="post" action="/api/entries" style={{ display: 'grid', gap: '12px', maxWidth: 720 }}>
+    <main style={{ maxWidth: 540, margin: "40px auto", fontFamily: "system-ui" }}>
+      <h1 style={{ textAlign: "center", margin: 24 }}>New Entry</h1>
+      <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <label>
-          <div>User ID</div>
-          <input name="user_id" required style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Project
+          <input name="project" value={form.project} onChange={onField} required style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
         <label>
-          <div>Project</div>
-          <input name="project" required style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Type
+          <select name="type" value={form.type} onChange={onField} required style={{ width: "100%", padding: 8, border: "1px solid #ddd" }}>
+            {entryTypes.map(option =>
+              <option key={option} value={option}>{option}</option>
+            )}
+          </select>
         </label>
         <label>
-          <div>Type (UI | API | test | security)</div>
-          <input name="type" required style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Prompt
+          <textarea name="prompt" value={form.prompt} onChange={onField} required rows={2} style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
         <label>
-          <div>Prompt</div>
-          <textarea name="prompt" required rows={3} style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          AI Draft
+          <textarea name="ai_draft" value={form.ai_draft} onChange={onField} rows={2} style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
         <label>
-          <div>AI Draft</div>
-          <textarea name="ai_draft" rows={3} style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Edits
+          <textarea name="edits" value={form.edits} onChange={onField} rows={2} style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
         <label>
-          <div>Your Edits</div>
-          <textarea name="edits" rows={3} style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Why
+          <textarea name="why" value={form.why} onChange={onField} rows={2} style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
         <label>
-          <div>Why</div>
-          <textarea name="why" rows={3} style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
+          Evidence
+          <textarea name="evidence" value={form.evidence} onChange={onField} rows={2} style={{ width: "100%", padding: 8, border: "1px solid #ddd" }} />
         </label>
-        <label>
-          <div>Evidence</div>
-          <textarea name="evidence" rows={3} style={{ width: '100%', padding: '8px', border: '1px solid #ddd' }} />
-        </label>
-        <button type="submit" style={{ padding: '10px 14px', background: '#111', color: '#fff', border: 'none' }}>
-          Create
+        <button type="submit" style={{ padding: "12px", background: "#266", color: "#fff", fontWeight: 600, border: "none", marginTop: 8 }}>
+          {loading ? "Saving..." : "Create Entry"}
         </button>
+        {error && <div style={{ color: "#a00", marginTop: 8, textAlign: "center" }}>{error}</div>}
       </form>
     </main>
   );
