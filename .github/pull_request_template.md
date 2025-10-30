@@ -1,15 +1,14 @@
 ## Prompts Used
-- P-01: Scaffold Next.js app Vibe Ledger
+- (List the prompts that generated code or changes)
 
-## AI Draft Diff Link
-- Compare: feature/v1 -> main (commit ___)
+## AI Draft Link/Hash
+- (Commit or diff link to the AI-generated draft)
 
-## Manual Changes Summary
-- What did you change by hand and why? (validation, UX, security, perf)
+## Your Manual Changes
+- (What you changed and why — validation, UX, security, performance)
 
 ## Test Evidence
-- Coverage delta or named tests
-- All tests green?
+- (Named tests added/updated; coverage delta if known)
 
-## Risk/Impact
-- Low/Med/High + mitigation
+## Risk / Impact
+- (Low/Med/High + mitigation)
