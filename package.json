@@ -9,11 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
     "@clerk/nextjs": "latest",
     "@prisma/client": "latest",
-    "prisma": "latest"
+    "next": "latest",
+    "pg": "^8.16.3",
+    "prisma": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }
