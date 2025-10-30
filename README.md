@@ -1,3 +1,4 @@
+Vibe Ledger — workspace configured
 # Vibe Ledger — Starter
 
 ## One-liner
